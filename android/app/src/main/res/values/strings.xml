@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PPS-PP-App4</string>
+    <string name="title_activity_main">PPS-PP-App4</string>
+    <string name="package_name">com.pp4.app</string>
+    <string name="custom_url_scheme">com.pp4.app</string>
+</resources>
