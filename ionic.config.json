@@ -1,0 +1,7 @@
+{
+  "name": "PPS-PP-App4",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
