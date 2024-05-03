@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Registro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<div class="container">
+  <ion-button expand="block" [disabled]="loginForm.valid" color="danger" (click)="navCtrl.navigateForward('/login')">
+    Ingresar
+  </ion-button>
+  <ion-card class="ion-padding">
+    <ion-card-content class="ion-no-padding">
+      <form #loginForm="ngForm">
+        <div style="display: flex;">
+          <ion-item>
+            <ion-input label="Nombre" labelPlacement="stacked" type="text" [(ngModel)]="name" name="name" required
+              (keypress)="filterInput($event)">
+            </ion-input>
+          </ion-item>
+          <ion-select fill="outline" label="Tipo de usuario" labelPlacement="floating"
+            [(ngModel)]="this.type" name="type" required style="margin-left: 5px;">
+            <ion-select-option value='admin'>ADMIN</ion-select-option>
+            <ion-select-option value='tester'>TESTER</ion-select-option>
+            <ion-select-option value='invitado'>INVITADO</ion-select-option>
+            <ion-select-option value='usuario'>USUARIO</ion-select-option>
+          </ion-select>
+        </div>
+        <ion-item>
+          <ion-input label="Contraseña" [clearOnEdit]="false" labelPlacement="fixed" fill="solid" type="password"
+            [(ngModel)]="password" name="password" required>
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Correo" [clearInput]="true" labelPlacement="fixed" fill="solid" type="email"
+          errorText="Correo inválido" [(ngModel)]="email" name="email" required></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Reingrese" [clearOnEdit]="false" labelPlacement="fixed" fill="solid" type="password"
+            [(ngModel)]="passCheck" name="passCheck" required>
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
+        </ion-item>
+        <div style="display: flex;">
+          <ion-select fill="outline" label="Género" labelPlacement="floating"
+            [(ngModel)]="this.gender" name="gender" required style="margin-right: 5px;">
+            <ion-select-option value='femenino'>FEMENINO</ion-select-option>
+            <ion-select-option value='masculino'>MASCULINO</ion-select-option>
+          </ion-select>
+          <ion-item>
+            <ion-input label="Apellido" labelPlacement="stacked" type="text" [(ngModel)]="lastName" name="lastName"
+              required (keypress)="filterInput($event)">
+            </ion-input>
+          </ion-item>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+  <ion-button expand="block" [disabled]="!loginForm.valid" color="success" (click)="signup()">
+    Registrarse
+  </ion-button>
+</div>

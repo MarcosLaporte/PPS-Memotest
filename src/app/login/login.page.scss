@@ -1,0 +1,25 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-style: italic;
+  
+  ion-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    color: chocolate;
+
+    ion-input {
+      --color: chocolate;
+    }
+  }
+  
+  ion-button {
+    flex: 1;
+    font-size: 10vw;
+    font-weight: bold;
+  }
+}
