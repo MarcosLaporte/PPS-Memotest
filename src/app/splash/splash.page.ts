@@ -9,6 +9,10 @@ import { NavController } from '@ionic/angular';
 export class SplashPage {
   constructor(private navCtrl: NavController) {
     setTimeout(() => {
+      const audio = new Audio('../../assets/sounds/cards.mp3');
+      audio.play();
+    }, 500);
+    setTimeout(() => {
       navCtrl.navigateRoot('/home');
       history.pushState(null, '');
     }, 2650);
