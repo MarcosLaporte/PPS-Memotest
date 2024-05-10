@@ -4,45 +4,47 @@
   </ion-toolbar>
 </ion-header>
 
-<div class="container">
-  <ion-button expand="block" [disabled]="loginForm.valid" color="danger" (click)="navCtrl.navigateForward('/signup')">
+<div class="container bg-img">
+  <ion-button expand="fill" [disabled]="loginForm.valid" color="danger" (click)="navCtrl.navigateForward('/signup')">
     Registrarse
   </ion-button>
   <ion-card class="ion-padding">
     <ion-card-content class="ion-no-padding">
       <form #loginForm="ngForm">
-        <ion-select fill="outline" label="Acceso rápido" labelPlacement="floating"
-          (ionChange)="quickFill($event.target.value.email, $event.target.value.pass)">
-          <ion-select-option [value]="{email: 'admin@admin.com', pass: '111111'}">
-            ADMIN
-          </ion-select-option>
-          <ion-select-option [value]="{email: 'invitado@invitado.com', pass: '222222'}">
-            INVITADO
-          </ion-select-option>
-          <ion-select-option [value]="{email: 'usuario@usuario.com', pass: '333333'}">
-            USUARIO
-          </ion-select-option>
-          <ion-select-option [value]="{email: 'anonimo@anonimo.com', pass: '444444'}">
-            ANONIMO
-          </ion-select-option>
-          <ion-select-option [value]="{email: 'tester@tester.com', pass: '555555'}">
-            TESTER
-          </ion-select-option>
-        </ion-select>
         <ion-item>
-          <ion-input label="Contraseña" [clearOnEdit]="false" labelPlacement="fixed" fill="solid" type="password"
+          <ion-select fill="outline" label="Acceso rápido" labelPlacement="floating"
+            (ionChange)="quickFill($event.target.value.email, $event.target.value.pass)">
+            <ion-select-option [value]="{email: 'admin@admin.com', pass: '111111'}">
+              ADMIN
+            </ion-select-option>
+            <ion-select-option [value]="{email: 'invitado@invitado.com', pass: '222222'}">
+              INVITADO
+            </ion-select-option>
+            <ion-select-option [value]="{email: 'usuario@usuario.com', pass: '333333'}">
+              USUARIO
+            </ion-select-option>
+            <ion-select-option [value]="{email: 'anonimo@anonimo.com', pass: '444444'}">
+              ANONIMO
+            </ion-select-option>
+            <ion-select-option [value]="{email: 'tester@tester.com', pass: '555555'}">
+              TESTER
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Contraseña" [clearOnEdit]="false" labelPlacement="fixed" fill="outline" type="password"
             [(ngModel)]="password" name="password" required>
             <ion-input-password-toggle slot="end"></ion-input-password-toggle>
           </ion-input>
         </ion-item>
         <ion-item>
-          <ion-input label="Correo" [clearInput]="true" labelPlacement="fixed" fill="solid" type="email"
+          <ion-input label="Correo" [clearInput]="true" labelPlacement="fixed" fill="outline" type="email"
             errorText="Correo inválido" [(ngModel)]="email" name="email" required></ion-input>
         </ion-item>
       </form>
     </ion-card-content>
   </ion-card>
-  <ion-button expand="block" [disabled]="!loginForm.valid" color="success" (click)="login()">
+  <ion-button expand="fill" [disabled]="!loginForm.valid" color="success" (click)="login()">
     Ingresar
   </ion-button>
 </div>
