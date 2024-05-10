@@ -18,6 +18,7 @@
     display: none;
   }
 }
+
 @keyframes slit-out-vertical {
   0% {
     -webkit-transform: translateZ(0) rotateY(0);
@@ -47,24 +48,20 @@ ion-content {
 
 .container {
   height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  text-align: center;
 
-  ion-row {
-    height: 33%;
-    align-content: center;
-    justify-content: center;
-    text-align: center;
-    font-family: Bahnschrift condensed !important;
-    font-weight: 750 !important;
-    text-transform: uppercase;
-    color: #b2b5af !important;
+  font-family: Bahnschrift condensed !important;
+  font-weight: 750 !important;
+  text-transform: uppercase;
+  color: #b2b5af !important;
 
-    * {
-      -webkit-animation: slit-out-vertical 1.5s ease-out 1s normal forwards;
-      animation: slit-out-vertical 1.5s ease-out 1s normal forwards;
-    }
+  -webkit-animation: slit-out-vertical 1.5s ease-out 1s normal forwards;
+  animation: slit-out-vertical 1.5s ease-out 1s normal forwards;
 
-    img {
-      width: 150px;
-    }
+  img {
+    width: 45%;
   }
 }
