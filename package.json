@@ -9,7 +9,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "sync": "ionic build && ionic cap sync android"
   },
   "private": true,
   "dependencies": {
@@ -27,13 +28,14 @@
     "@capacitor/core": "^6.0.0",
     "@capacitor/haptics": "6.0.0",
     "@capacitor/keyboard": "6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
     "@capacitor/status-bar": "6.0.0",
     "@ionic/angular": "^8.0.0",
     "firebase-tools": "^13.8.0",
     "ionicons": "^7.0.0",
     "ngx-spinner": "^16.0.2",
     "rxjs": "~7.8.0",
-    "sweetalert2": "^11.10.8",
+    "sweetalert2": "^11.6.13",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"
   },
