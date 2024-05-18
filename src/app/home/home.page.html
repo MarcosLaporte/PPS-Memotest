@@ -9,7 +9,20 @@
 
 <div class="container bg-img">
   <ng-container *ngIf="userInSession; else noUser">
-    To continue...
+    <div class="difficulty">
+      <h1 class="title ion-margin-start ion-margin-end">Elija una dificultad:</h1>
+      <div class="options ion-margin">
+        <ion-button color="success" (click)="selectDif('easy')">
+          <img src="../../assets/difficulty/easy.png">
+        </ion-button>
+        <ion-button color="warning" (click)="selectDif('mid')">
+          <img src="../../assets/difficulty/mid.png">
+        </ion-button>
+        <ion-button color="danger" (click)="selectDif('hard')">
+          <img src="../../assets/difficulty/hard.png">
+        </ion-button>
+      </div>
+    </div>
   </ng-container>
   <ng-template #noUser>
     <ion-card class="ion-padding ion-margin">

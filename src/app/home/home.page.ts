@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { User } from '../interfaces';
+import { Difficulty, User } from '../interfaces';
 import { NavController } from '@ionic/angular';
 import { ToastInfo } from '../utils';
 
@@ -10,7 +10,7 @@ import { ToastInfo } from '../utils';
   styleUrls: ['home.page.scss'],
 })
 
-export class HomePage implements OnInit{
+export class HomePage implements OnInit {
   protected userInSession: User | null;
 
   constructor(public auth: AuthService, protected navCtrl: NavController) {
@@ -20,6 +20,12 @@ export class HomePage implements OnInit{
 
   ngOnInit() {
     this.auth.userInSessionObs.subscribe((user) => this.userInSession = user);
+  }
+
+  selectDif(difficulty: Difficulty) {
+    this.navCtrl.navigateRoot(['/game'], {
+      state: { difficulty: difficulty }
+    });
   }
 
   signOut() {

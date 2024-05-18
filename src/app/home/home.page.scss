@@ -4,6 +4,30 @@
   flex-direction: column;
   justify-content: center;
 
+  .difficulty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .title {
+      font-family: "Raleway", sans-serif;
+      font-weight: bolder;
+      font-size: 40px;
+    }
+
+    .options {
+
+      ion-button {
+        width: 100%;
+
+        img {
+          width: 50%;
+        }
+      }
+    }
+  }
+
   * {
     color: darkblue;
     font-family: monospace;
