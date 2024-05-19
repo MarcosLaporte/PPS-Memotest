@@ -9,7 +9,7 @@
 
 <div class="container bg-img ion-padding-top ion-padding-bottom">
   <div class="cards" id="cards-container">
-    <ion-button class="card show" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
+    <ion-button class="card" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
       <img [src]="card.url">
     </ion-button>
   </div>
