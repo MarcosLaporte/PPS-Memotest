@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Difficulty } from '../interfaces';
-import { ToastError, ToastInfo } from '../utils';
+import { MySwal, ToastError, ToastInfo } from '../utils';
 import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import arrayShuffle from 'array-shuffle';
 import { AuthService } from '../services/auth.service';
+import { ListResult } from '@angular/fire/storage';
 
 declare type Topic = 'animals' | 'tools' | 'fruits';
 declare type MemoData = { amount: number, topic: Topic };
@@ -30,6 +31,7 @@ enum CardStatus { Hide, Show, Correct, Wrong };
 export class GamePage implements OnInit {
   difficulty!: Difficulty;
   memo!: MemoData;
+  private allCards?: ListResult;
   cards: Card[] = [];
 
   constructor(
@@ -40,75 +42,39 @@ export class GamePage implements OnInit {
     private auth: AuthService
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras?.state) {
-      let auxDif = navigation.extras.state['difficulty'];
-      if (!this.isDifficulty(auxDif)) {
-        this.navCtrl.navigateRoot(['/home']);
-        ToastError.fire('Hubo un error.');
-      } else {
-        this.difficulty = auxDif;
-        // this.loadMemotest(availableMemos.get(this.difficulty)!.topic);
-        this.cards = [
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fsnake.png?alt=media&token=edeb2da7-f6e0-46df-958d-2f2bcd0ac351",
-            "value": "snake",
-            "isCopy": false
-          },
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fsnake.png?alt=media&token=edeb2da7-f6e0-46df-958d-2f2bcd0ac351",
-            "value": "snake",
-            "isCopy": true
-          },
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fpenguin.png?alt=media&token=aaad0805-0030-4db0-81d3-7564f23101d7",
-            "value": "penguin",
-            "isCopy": true
-          },
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fpenguin.png?alt=media&token=aaad0805-0030-4db0-81d3-7564f23101d7",
-            "value": "penguin",
-            "isCopy": false
-          },
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fcat.png?alt=media&token=58a9b5ed-f8ae-424c-9d3c-b53b8c6c2999",
-            "value": "cat",
-            "isCopy": false
-          },
-          {
-            "url": "https://firebasestorage.googleapis.com/v0/b/primer-parcial-app1.appspot.com/o/images%2Fmemotest%2Fanimals%2Fcat.png?alt=media&token=58a9b5ed-f8ae-424c-9d3c-b53b8c6c2999",
-            "value": "cat",
-            "isCopy": true
-          }
-        ]; //TODO: Erase this hardcoded data
-      }
-    } else {
+    if (!navigation?.extras?.state || !this.isDifficulty(navigation.extras.state['difficulty'])) {
       this.navCtrl.navigateRoot(['/home']);
       ToastError.fire('Hubo un error.');
+      return;
     }
-  }
 
-  private isDifficulty = (data: any) => {
-    const difficulties: Difficulty[] = ['easy', 'mid', 'hard'];
-    return difficulties.includes(data);
-  }
-
-  async loadMemotest(topic: Topic) {
     this.spinner.show();
+    this.difficulty = navigation.extras.state['difficulty'];
     this.memo = availableMemos.get(this.difficulty)!;
 
+    const topic = this.memo.topic;
+    this.allCards = await this.storage.getAllFiles(`images/memotest/${topic}/`);
+
+    await this.loadNewMemotest();
+    this.spinner.hide();
+  }
+
+  private isDifficulty = (data: any) => ['easy', 'mid', 'hard'].includes(data);
+
+  async loadNewMemotest() {
+    if (!this.allCards) throw new Error('Ocurrió un problema.');
     let cardsChosenIndex: number[] = [];
-    const list = await this.storage.getAllFiles(`images/memotest/${topic}/`);
 
     for (let i = 0; i < this.memo.amount; i++) {
       let random: number;
       do {
-        random = Math.floor(Math.random() * (list.items).length);
+        random = Math.floor(Math.random() * (this.allCards.items).length);
       } while (cardsChosenIndex.includes(random));
 
       cardsChosenIndex.push(random);
-      const fileRef = list.items[random];
+      const fileRef = this.allCards.items[random];
       const url = await this.storage.getFileDownloadUrl(fileRef.fullPath);
       const name = (fileRef.name).split('.')[0];
       this.cards.push({ url: url, value: name, isCopy: false });
@@ -116,14 +82,22 @@ export class GamePage implements OnInit {
     }
 
     this.cards = arrayShuffle(this.cards);
-    this.spinner.hide();
   }
 
+  stopwatch?: Stopwatch;
   chosenCard1?: Card;
   chosenCard2?: Card;
 
+  startStopwatch() {
+    this.stopwatch = new Stopwatch();
+    this.stopwatch.displayElementId = 'stopwatch';
+    this.stopwatch.start();
+  }
+
   private isLoading: boolean = false;
+  private correctGuesses: Card[] = [];
   async flipCard(card: Card) {
+    if (!this.stopwatch) this.startStopwatch();
     if (this.isLoading) return;
     if (card === this.chosenCard1) {
       ToastError.fire('Seleccione una tarjeta diferente.');
@@ -136,18 +110,22 @@ export class GamePage implements OnInit {
       this.chosenCard1 = card;
       return;
     }
-    
+
     this.isLoading = true;
     const firstCardHtml = document.getElementById(this.getCardId(this.chosenCard1!));
     this.chosenCard2 = card;
     if (this.sameCards()) {
       this.handleCard(firstCardHtml!, CardStatus.Correct);
+      this.correctGuesses.push(this.chosenCard1);
       this.handleCard(chosenCardHtml!, CardStatus.Correct);
+      this.correctGuesses.push(card);
+
+      if (this.correctGuesses.length === this.cards.length) this.finishGame();
     } else {
       this.handleCard(firstCardHtml!, CardStatus.Wrong);
       this.handleCard(chosenCardHtml!, CardStatus.Wrong);
-      await this.delay(1500);
-      
+      await this.delay(750);
+
       this.handleCard(firstCardHtml!, CardStatus.Hide);
       this.handleCard(chosenCardHtml!, CardStatus.Hide);
     }
@@ -185,9 +163,85 @@ export class GamePage implements OnInit {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  finishGame() {
+    this.stopwatch!.stop();
+    MySwal.fire({
+      title: 'Felicidades!',
+      html: `Ha terminado en ${this.stopwatch!.getFormattedTime()}s`,
+      icon: 'success',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: true,
+      confirmButtonText: 'Jugar de nuevo',
+      showCancelButton: false,
+      showDenyButton: true,
+      denyButtonText: 'Cambiar dificultad'
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        this.spinner.show();
+        this.correctGuesses = [];
+        this.cards = [];
+        this.stopwatch = undefined;
+        await this.loadNewMemotest();
+        this.spinner.hide();
+      } else this.navCtrl.navigateRoot(['/home']);
+    });
+  }
+
   signOut() {
     this.auth.signOut();
     ToastInfo.fire('Sesión cerrada.');
     this.navCtrl.navigateBack('/login');
+  }
+}
+
+class Stopwatch {
+  private startTime: number = 0;
+  private elapsedTime: number = 0;
+  private intervalId: any = null;
+  displayElementId?: string;
+
+  start() {
+    if (this.intervalId !== null) return;
+    this.startTime = Date.now() - this.elapsedTime;
+    this.intervalId = setInterval(() => {
+      this.elapsedTime = Date.now() - this.startTime;
+      this.displayTime();
+    }, 100);
+  }
+
+  stop() {
+    if (this.intervalId === null) return;
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+  }
+
+  reset() {
+    this.stop();
+    this.elapsedTime = 0;
+    this.displayTime();
+  }
+
+  private displayTime() {
+    const timeStr = this.getFormattedTime();
+
+    if (this.displayElementId) {
+      const htmlEl = document.getElementById(this.displayElementId);
+      if (htmlEl) { htmlEl.innerText = timeStr; return; };
+    }
+
+    console.log(timeStr);
+  }
+
+  getTimeMs() {
+    return this.elapsedTime;
+  }
+
+  getFormattedTime() {
+    const time = new Date(this.elapsedTime);
+    const seconds = String(time.getSeconds()).padStart(2, '0');
+    const milliseconds = String(time.getMilliseconds()).padStart(3, '0');
+
+    return `${seconds}.${milliseconds}`;
   }
 }

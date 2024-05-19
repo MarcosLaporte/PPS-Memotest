@@ -8,7 +8,10 @@
 </ion-header>
 
 <div class="container bg-img">
-  <div class="cards">
+  <div class="stopwatch-container ion-margin-start ion-margin-end">
+    <h1 id="stopwatch">00.000</h1>
+  </div>
+  <div class="cards ion-margin" id="cards-container">
     <ion-button class="card" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
       <div class="cover">
         <img [src]="card.url">

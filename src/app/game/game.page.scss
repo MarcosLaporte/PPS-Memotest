@@ -3,9 +3,22 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  font-family: "Raleway", sans-serif;
+  font-weight: bolder;
+  color: #080808;
+
+  .stopwatch-container {
+    display: flex;
+    justify-content: center;
+
+    h1 {
+      font-size: 3.5rem;
+      font-family: digital-font;
+    }
+  }
 
   .cards {
-    height: 90%;
+    height: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -32,4 +45,9 @@
 .button-disabled {
   opacity: 1 !important;
   filter: brightness(0.5);
+}
+
+@font-face {
+  font-family: 'digital-font';
+  src: url(../../assets/digital-italic.ttf);
 }
