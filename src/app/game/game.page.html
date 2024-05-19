@@ -1,13 +1,18 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>game</ion-title>
+    <ion-title>Memotest</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button fill="outline" (click)="signOut()"> Cerrar sesión </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">game</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+<div class="container bg-img">
+  <div class="cards">
+    <ion-button class="card" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
+      <div class="cover">
+        <img [src]="card.url">
+      </div>
+    </ion-button>
+  </div>
+</div>
