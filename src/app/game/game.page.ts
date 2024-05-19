@@ -10,12 +10,12 @@ import { AuthService } from '../services/auth.service';
 import { ListResult } from '@angular/fire/storage';
 
 declare type Topic = 'animals' | 'tools' | 'fruits';
-declare type MemoData = { amount: number, topic: Topic };
+declare type MemoData = { pairs: number, topic: Topic };
 declare type MemoConfig = Map<Difficulty, MemoData>;
 const availableMemos: MemoConfig = new Map<Difficulty, MemoData>([
-  ['easy', { amount: 3, topic: 'animals' }],
-  ['mid', { amount: 5, topic: 'tools' }],
-  ['hard', { amount: 8, topic: 'fruits' }]
+  ['easy', { pairs: 3, topic: 'animals' }],
+  ['mid', { pairs: 5, topic: 'tools' }],
+  ['hard', { pairs: 8, topic: 'fruits' }]
 ]);
 declare interface Card {
   url: string,
@@ -55,6 +55,7 @@ export class GamePage implements OnInit {
     this.memo = availableMemos.get(this.difficulty)!;
 
     const topic = this.memo.topic;
+    document.getElementById('cards-container')?.classList.add(topic);
     this.allCards = await this.storage.getAllFiles(`images/memotest/${topic}/`);
 
     await this.loadNewMemotest();
@@ -67,7 +68,7 @@ export class GamePage implements OnInit {
     if (!this.allCards) throw new Error('Ocurrió un problema.');
     let cardsChosenIndex: number[] = [];
 
-    for (let i = 0; i < this.memo.amount; i++) {
+    for (let i = 0; i < this.memo.pairs; i++) {
       let random: number;
       do {
         random = Math.floor(Math.random() * (this.allCards.items).length);
@@ -239,7 +240,8 @@ class Stopwatch {
 
   getFormattedTime() {
     const time = new Date(this.elapsedTime);
-    const seconds = String(time.getSeconds()).padStart(2, '0');
+    const minSeconds = time.getMinutes() * 60;
+    const seconds = String(minSeconds + time.getSeconds()).padStart(2, '0');
     const milliseconds = String(time.getMilliseconds()).padStart(3, '0');
 
     return `${seconds}.${milliseconds}`;

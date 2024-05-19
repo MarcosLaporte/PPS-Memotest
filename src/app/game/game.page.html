@@ -1,21 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Memotest</ion-title>
+    <ion-title id="stopwatch">Memotest</ion-title>
     <ion-buttons slot="primary">
       <ion-button fill="outline" (click)="signOut()"> Cerrar sesión </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<div class="container bg-img">
-  <div class="stopwatch-container ion-margin-start ion-margin-end">
-    <h1 id="stopwatch">00.000</h1>
-  </div>
-  <div class="cards ion-margin" id="cards-container">
-    <ion-button class="card" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
-      <div class="cover">
-        <img [src]="card.url">
-      </div>
+<div class="container bg-img ion-padding-top ion-padding-bottom">
+  <div class="cards" id="cards-container">
+    <ion-button class="card show" *ngFor="let card of cards" (click)="flipCard(card)" [id]="getCardId(card)">
+      <img [src]="card.url">
     </ion-button>
   </div>
 </div>
