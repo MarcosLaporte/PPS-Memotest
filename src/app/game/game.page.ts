@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Difficulty } from '../interfaces';
+import { Difficulty, Score, User } from '../interfaces';
 import { MySwal, ToastError, ToastInfo } from '../utils';
 import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
@@ -8,6 +8,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import arrayShuffle from 'array-shuffle';
 import { AuthService } from '../services/auth.service';
 import { ListResult } from '@angular/fire/storage';
+import { DatabaseService } from '../services/database.service';
 
 declare type Topic = 'animals' | 'tools' | 'fruits';
 declare type MemoData = { pairs: number, topic: Topic };
@@ -39,7 +40,8 @@ export class GamePage implements OnInit {
     private navCtrl: NavController,
     private storage: StorageService,
     private spinner: NgxSpinnerService,
-    private auth: AuthService
+    private auth: AuthService,
+    private db: DatabaseService
   ) { }
 
   async ngOnInit() {
@@ -58,13 +60,13 @@ export class GamePage implements OnInit {
     document.getElementById('cards-container')?.classList.add(topic);
     this.allCards = await this.storage.getAllFiles(`images/memotest/${topic}/`);
 
-    await this.loadNewMemotest();
+    await this.loadMemotest();
     this.spinner.hide();
   }
 
   private isDifficulty = (data: any) => ['easy', 'mid', 'hard'].includes(data);
 
-  async loadNewMemotest() {
+  async loadMemotest() {
     if (!this.allCards) throw new Error('Ocurrió un problema.');
     let cardsChosenIndex: number[] = [];
 
@@ -164,29 +166,92 @@ export class GamePage implements OnInit {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  finishGame() {
+  async finishGame() {
     this.stopwatch!.stop();
-    MySwal.fire({
+    const newScore: Score = {
+      id: '',
+      userDocId: this.auth.UserInSession!.id,
+      difficulty: this.difficulty,
+      seconds: this.stopwatch!.getSeconds(),
+      date: new Date()
+    };
+
+    this.db.addData(`memoScores`, newScore);
+    await MySwal.fire({
       title: 'Felicidades!',
-      html: `Ha terminado en ${this.stopwatch!.getFormattedTime()}s`,
+      html: `Ha terminado en <b>${this.stopwatch!.getFormattedTime()}s</b>`,
       icon: 'success',
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: true,
       confirmButtonText: 'Jugar de nuevo',
-      showCancelButton: false,
+      showCancelButton: true,
+      cancelButtonText: 'Ver mejores registros',
       showDenyButton: true,
       denyButtonText: 'Cambiar dificultad'
     }).then(async (res) => {
-      if (res.isConfirmed) {
-        this.spinner.show();
-        this.correctGuesses = [];
-        this.cards = [];
-        this.stopwatch = undefined;
-        await this.loadNewMemotest();
-        this.spinner.hide();
-      } else this.navCtrl.navigateRoot(['/home']);
+      if (res.isConfirmed)
+        this.newGame();
+      else if (res.isDenied)
+        this.navCtrl.navigateRoot(['/home']);
+      else
+        await this.showHighScores();
+
     });
+  }
+
+  async showHighScores() {
+    this.spinner.show();
+    const highscores = await this.getScores();
+    this.spinner.hide();
+
+    MySwal.fire({
+      title: 'Mejores puntajes',
+      html: await this.createListElement(highscores),
+      allowOutsideClick: false,
+      showConfirmButton: true,
+      confirmButtonText: 'Jugar de nuevo',
+      showCancelButton: false,
+      showDenyButton: true,
+      denyButtonText: 'Cambiar dificultad'
+    }).then((res) => {
+      if (res.isDenied)
+        this.navCtrl.navigateRoot(['/home']);
+      else
+        this.newGame();
+    });
+  }
+
+  readonly getScores = async (): Promise<Score[]> => {
+    return (await this.db.getData<Score>('memoScores', 'seconds'))
+      .filter((score) => score.difficulty === this.difficulty)
+      .slice(0, 5);
+  };
+
+  readonly createListElement = async (highscores: Score[]) => {
+    const listElement = document.createElement('ul');
+    for (let score of highscores) {
+      const itemEl = document.createElement('li');
+      const user = await this.db.getDataFromDoc<User>('users', score.userDocId);
+      itemEl.innerHTML = `${user.name} ${user.lastname} - ${score.seconds}"`;
+      if (this.auth.UserInSession!.id === user.id)
+        itemEl.style.fontWeight = 'bolder';
+      itemEl.style.textAlign = 'start';
+      itemEl.style.fontFamily = '"Raleway", sans-serif';
+      itemEl.style.fontSize = '1.5rem';
+      listElement.appendChild(itemEl);
+    }
+
+    return listElement;
+  }
+
+  async newGame() {
+    this.spinner.show();
+    this.correctGuesses = [];
+    this.cards = [];
+    this.stopwatch = undefined;
+    await this.loadMemotest();
+    this.spinner.hide();
   }
 
   signOut() {
@@ -217,15 +282,8 @@ class Stopwatch {
     this.intervalId = null;
   }
 
-  reset() {
-    this.stop();
-    this.elapsedTime = 0;
-    this.displayTime();
-  }
-
   private displayTime() {
     const timeStr = this.getFormattedTime();
-
     if (this.displayElementId) {
       const htmlEl = document.getElementById(this.displayElementId);
       if (htmlEl) { htmlEl.innerText = timeStr; return; };
@@ -234,8 +292,8 @@ class Stopwatch {
     console.log(timeStr);
   }
 
-  getTimeMs() {
-    return this.elapsedTime;
+  getSeconds() {
+    return this.elapsedTime / 1000;
   }
 
   getFormattedTime() {
