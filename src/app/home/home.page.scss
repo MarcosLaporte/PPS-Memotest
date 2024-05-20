@@ -16,13 +16,33 @@
       font-size: 40px;
     }
 
-    .options {
+    @media (orientation: portrait) {
+      .options {
+        ion-button {
+          height: 26vh;
+          width: 100%;
 
-      ion-button {
-        width: 100%;
+          img {
+            height: 80%;
+          }
+        }
+      }
+    }
 
-        img {
-          width: 50%;
+    @media (orientation: landscape) {
+      .options {
+        height: calc(100% - 48px);
+        display: flex;
+        justify-content: center;
+        margin-bottom: 16px;
+
+        ion-button {
+          height: 100%;
+          width: 30vw;
+
+          img {
+            width: 80%;
+          }
         }
       }
     }

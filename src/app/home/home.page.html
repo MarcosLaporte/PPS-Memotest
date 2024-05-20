@@ -10,8 +10,8 @@
 <div class="container bg-img">
   <ng-container *ngIf="userInSession; else noUser">
     <div class="difficulty">
-      <h1 class="title ion-margin-start ion-margin-end">Elija una dificultad:</h1>
-      <div class="options ion-margin">
+      <h1 class="title ion-margin-horizontal">Elija una dificultad:</h1>
+      <div class="options ion-margin-horizontal">
         <ion-button color="success" (click)="selectDif('easy')">
           <img src="../../assets/difficulty/easy.png">
         </ion-button>
