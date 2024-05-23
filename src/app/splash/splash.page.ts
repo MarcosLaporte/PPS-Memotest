@@ -11,10 +11,10 @@ export class SplashPage {
     setTimeout(() => {
       const audio = new Audio('../../assets/sounds/cards.mp3');
       audio.play();
-    }, 500);
+    }, 1750);
     setTimeout(() => {
       navCtrl.navigateRoot('/home');
       history.pushState(null, '');
-    }, 2650);
+    }, 3650);
   }
 }
