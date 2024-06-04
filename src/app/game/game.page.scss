@@ -1,5 +1,5 @@
 #stopwatch {
-  font-family: digital-font;
+  font-family: monospace;
   font-size: 2.25rem
 }
 .container {
@@ -68,9 +68,4 @@
 .button-disabled {
   opacity: 1 !important;
   filter: brightness(0.5);
-}
-
-@font-face {
-  font-family: 'digital-font';
-  src: url(../../assets/digital-italic.ttf);
 }

@@ -9,6 +9,7 @@ import arrayShuffle from 'array-shuffle';
 import { AuthService } from '../services/auth.service';
 import { ListResult } from '@angular/fire/storage';
 import { DatabaseService } from '../services/database.service';
+import { HighscoresService } from '../services/highscores.service';
 
 declare type Topic = 'animals' | 'tools' | 'fruits';
 declare type MemoData = { pairs: number, topic: Topic };
@@ -41,7 +42,8 @@ export class GamePage implements OnInit {
     private storage: StorageService,
     private spinner: NgxSpinnerService,
     private auth: AuthService,
-    private db: DatabaseService
+    private db: DatabaseService,
+    private scoresServ: HighscoresService
   ) { }
 
   async ngOnInit() {
@@ -83,7 +85,7 @@ export class GamePage implements OnInit {
       this.cards.push({ url: url, value: name, isCopy: false });
       this.cards.push({ url: url, value: name, isCopy: true });
     }
-
+    
     this.cards = arrayShuffle(this.cards);
   }
 
@@ -188,7 +190,7 @@ export class GamePage implements OnInit {
       showCancelButton: true,
       cancelButtonText: 'Ver mejores registros',
       showDenyButton: true,
-      denyButtonText: 'Cambiar dificultad'
+      denyButtonText: 'Volver al inicio'
     }).then(async (res) => {
       if (res.isConfirmed)
         this.newGame();
@@ -201,48 +203,13 @@ export class GamePage implements OnInit {
   }
 
   async showHighScores() {
-    this.spinner.show();
-    const highscores = await this.getScores();
-    this.spinner.hide();
-
-    MySwal.fire({
-      title: 'Mejores puntajes',
-      html: await this.createListElement(highscores),
-      allowOutsideClick: false,
-      showConfirmButton: true,
-      confirmButtonText: 'Jugar de nuevo',
-      showCancelButton: false,
-      showDenyButton: true,
-      denyButtonText: 'Cambiar dificultad'
-    }).then((res) => {
-      if (res.isDenied)
-        this.navCtrl.navigateRoot(['/home']);
-      else
+    this.scoresServ.difficulty = this.difficulty;
+    this.scoresServ.showHighscores(true).then((res) => {
+      if (res === 'confirm')
         this.newGame();
+      else
+        this.navCtrl.navigateRoot(['/home']);
     });
-  }
-
-  readonly getScores = async (): Promise<Score[]> => {
-    return (await this.db.getData<Score>('memoScores', 'seconds'))
-      .filter((score) => score.difficulty === this.difficulty)
-      .slice(0, 5);
-  };
-
-  readonly createListElement = async (highscores: Score[]) => {
-    const listElement = document.createElement('ul');
-    for (let score of highscores) {
-      const itemEl = document.createElement('li');
-      const user = await this.db.getDataFromDoc<User>('users', score.userDocId);
-      itemEl.innerHTML = `${user.name} ${user.lastname} - ${score.seconds}"`;
-      if (this.auth.UserInSession!.id === user.id)
-        itemEl.style.fontWeight = 'bolder';
-      itemEl.style.textAlign = 'start';
-      itemEl.style.fontFamily = '"Raleway", sans-serif';
-      itemEl.style.fontSize = '1.5rem';
-      listElement.appendChild(itemEl);
-    }
-
-    return listElement;
   }
 
   async newGame() {
@@ -288,13 +255,9 @@ class Stopwatch {
       const htmlEl = document.getElementById(this.displayElementId);
       if (htmlEl) { htmlEl.innerText = timeStr; return; };
     }
-
-    console.log(timeStr);
   }
 
-  getSeconds() {
-    return this.elapsedTime / 1000;
-  }
+  readonly getSeconds = () => this.elapsedTime / 1000;
 
   getFormattedTime() {
     const time = new Date(this.elapsedTime);

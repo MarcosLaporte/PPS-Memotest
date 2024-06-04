@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Difficulty, User } from '../interfaces';
 import { NavController } from '@ionic/angular';
-import { ToastInfo } from '../utils';
+import { MySwal, ToastInfo } from '../utils';
+import { HighscoresService } from '../services/highscores.service';
 
 @Component({
   selector: 'app-home',
@@ -13,9 +14,8 @@ import { ToastInfo } from '../utils';
 export class HomePage implements OnInit {
   protected userInSession: User | null;
 
-  constructor(public auth: AuthService, protected navCtrl: NavController) {
+  constructor(public auth: AuthService, protected navCtrl: NavController, private scoresServ: HighscoresService) {
     this.userInSession = auth.UserInSession;
-
   }
 
   ngOnInit() {
@@ -26,6 +26,31 @@ export class HomePage implements OnInit {
     this.navCtrl.navigateRoot(['/game'], {
       state: { difficulty: difficulty }
     });
+  }
+
+  async requestDifficulty() {
+    const result = await MySwal.fire({
+      title: 'Seleccione una dificultad',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: true,
+      confirmButtonText: 'Fácil',
+      confirmButtonColor: '#a5dc86',
+      showDenyButton: true,
+      denyButtonText: 'Media',
+      denyButtonColor: '#f0ec0d',
+      showCancelButton: true,
+      cancelButtonText: 'Difícil',
+      cancelButtonColor: '#f27474'
+    });
+    
+    return result.isConfirmed ? 'easy' : result.isDenied ? 'mid' : 'hard';
+  }
+
+  async showHighScores() {
+    const difficulty = await this.requestDifficulty();
+    this.scoresServ.difficulty = difficulty;
+    await this.scoresServ.showHighscores();
   }
 
   signOut() {

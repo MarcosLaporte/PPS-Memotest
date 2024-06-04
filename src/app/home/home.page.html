@@ -23,6 +23,11 @@
         </ion-button>
       </div>
     </div>
+    <ion-fab slot="fixed" vertical="top" horizontal="end" style="margin-top: 56px">
+      <ion-fab-button color="warning" (click)="showHighScores()">
+        <ion-icon name="trophy-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
   </ng-container>
   <ng-template #noUser>
     <ion-card class="ion-padding ion-margin">
